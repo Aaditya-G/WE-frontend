@@ -55,7 +55,10 @@ export const useGameConnection = ({ roomCode }: GameConnectionProps) => {
   );
 
   const handleReconnection = useCallback(async () => {
+    console.log('handleReconnection called', { userId, roomCode, isReconnecting, hasJoinedRoom: hasJoinedRoom.current });
+    
     if (!userId || !roomCode || isReconnecting || hasJoinedRoom.current) {
+      console.log('handleReconnection early return', { userId, roomCode, isReconnecting, hasJoinedRoom: hasJoinedRoom.current });
       return;
     }
     
@@ -81,9 +84,11 @@ export const useGameConnection = ({ roomCode }: GameConnectionProps) => {
         socket.on('joinRoomResponse', handleJoinRoomResponse);
       }
 
+      console.log('Attempting reconnectToRoom', { userId, roomCode });
       await reconnectToRoom(parseInt(userId, 10), roomCode);
 
     } catch (err: any) {
+      console.error('Reconnection failed:', err);
       setIsReconnecting(false);
       setError(err instanceof Error ? err.message : 'Failed to reconnect');
       
@@ -100,33 +105,46 @@ export const useGameConnection = ({ roomCode }: GameConnectionProps) => {
     }
   }, [userId, roomCode, reconnectAttempts, reconnectToRoom, toast, socket, handleJoinRoomResponse, isReconnecting]);
 
-  // Handle connection state changes
-  useEffect(() => {
-    if (isConnected) {
-      setIsReconnecting(false);
-      if (!hasJoinedRoom.current && userId && roomCode) {
-        socket?.emit('joinRoom', { userId: parseInt(userId, 10), code: roomCode });
-      }
-    }
-  }, [isConnected, userId, roomCode, socket]);
-
   useEffect(() => {
     const storedRoomCode = sessionStorage.getItem('roomCode');
     const storedUserId = sessionStorage.getItem('userId');
 
+    console.log('Main effect running', { 
+      storedRoomCode, 
+      storedUserId, 
+      roomCode, 
+      isConnected, 
+      hasJoinedRoom: hasJoinedRoom.current 
+    });
+
     if (!storedRoomCode || !storedUserId || storedRoomCode !== roomCode) {
+      console.log('Navigating to home - invalid storage state');
       navigate('/');
       return;
     }
 
     setUserId(storedUserId);
 
-    if (!isConnected && !hasJoinedRoom.current) {
-      handleReconnection();
+    // Set up joinRoomResponse listener before attempting to join
+    if (socket) {
+      console.log('Setting up socket listeners');
+      socket.off('joinRoomResponse', handleJoinRoomResponse); // Remove any existing listeners
+      socket.on('joinRoomResponse', handleJoinRoomResponse);  // Add new listener
+    }
+
+    if (!hasJoinedRoom.current) {
+      if (isConnected && socket) {
+        console.log('Emitting joinRoom directly');
+        socket.emit('joinRoom', { userId: parseInt(storedUserId, 10), code: roomCode });
+      } else {
+        console.log('Using reconnection logic');
+        handleReconnection();
+      }
     }
 
     if (socket) {
       const handleDisconnect = () => {
+        console.log('Socket disconnected');
         hasJoinedRoom.current = false;
         if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
           toast({
@@ -143,6 +161,7 @@ export const useGameConnection = ({ roomCode }: GameConnectionProps) => {
       });
 
       return () => {
+        console.log('Cleaning up socket listeners');
         socket.off('disconnect', handleDisconnect);
         socket.off('participantCount');
         socket.off('joinRoomResponse', handleJoinRoomResponse);
@@ -154,6 +173,7 @@ export const useGameConnection = ({ roomCode }: GameConnectionProps) => {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      console.log('Component unmounting - cleaning up');
       clearReconnectTimeout();
       hasJoinedRoom.current = false;
       setIsReconnecting(false);
