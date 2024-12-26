@@ -3,16 +3,37 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
+import { _USER } from "@/types";
+import { addUser } from "@/services/api/start";
+import { useToast } from "@/hooks/use-toast"
+
+
 
 const Start = () => {
-  const [name, setName] = useState("");
+  const [userFormData, setUserFormData] = useState<Partial<_USER>>({ name: "" });
   const [step, setStep] = useState(1);
+  const { toast } = useToast();
+  const [stepOneLoading , setStepOneLoading] = useState(false);
+  const [userData, setUserData] = useState<_USER | null>(null);
 
-  const handleStartClick = () => {
-    if (name.trim() === "") return; 
-    //todo -> call api to see if name is available or not to avoid duplicacy
-    setStep(2); 
+  const handleStartClick = async () => {
+    if (userFormData.name?.trim() === "") return;
+    try {
+      setStepOneLoading(true);
+      const user = await addUser(userFormData); // Assume backend accepts Partial<_USER>
+      setUserData(user); // Full _USER object returned from backend
+      setStep(2);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error?.response?.data?.message || "An error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setStepOneLoading(false);
+    }
   };
+  
 
   const handleCreateNewGame = () => {
     // Pseudo function for create new game logic
@@ -34,12 +55,12 @@ const Start = () => {
               <Input
                 type="text"
                 placeholder="Enter your name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={userFormData.name}
+                onChange={(e) => setUserFormData({ ...userFormData, name: e.target.value })}
                 className="w-full"
               />
               <Button onClick={handleStartClick} className="w-full">
-                Start
+                {stepOneLoading ? "Loading..." : "Start"}
               </Button>
             </div>
           </CardContent>
@@ -57,7 +78,9 @@ const Start = () => {
               >
                 <ArrowLeft className="w-5 h-5" />
               </Button>
-              <label className="text-gray-700 font-medium">Let's Play, {name}</label>
+              <label className="text-gray-700 font-medium">
+                Let's Play, {userData?.name}
+              </label>
             </div>
 
             <div className="flex flex-col gap-4">

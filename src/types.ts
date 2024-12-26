@@ -1,1 +1,4 @@
-//file to declare types
+export type _USER = {
+    id: number;
+    name: string;
+}
