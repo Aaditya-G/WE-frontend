@@ -21,3 +21,26 @@ export const addUser = async (data: Partial<_USER>) => {
   return res.data;
 }
 
+export const createRoom = async (userId: number): Promise<{ code: string }> => {
+  const options = {
+    method: 'POST',
+    data: { userId },
+  };
+  const res: AxiosResponse<{ code: string }> = await basicAxios(API_ENDPOINTS.createRoom, options);
+  return res.data;
+};
+
+export const joinRoom = async (userId: number, code: string): Promise<any> => {
+  const options = {
+    method: 'POST',
+    data: { userId, code },
+  };
+  const res: AxiosResponse<any> = await basicAxios(API_ENDPOINTS.joinRoom, options);
+  return res.data;
+};
+
+export const getRoomInfo = async (code: string): Promise<any> => {
+  const res: AxiosResponse<any> = await basicAxios(API_ENDPOINTS.getRoomInfo(code));
+  return res.data;
+};
+

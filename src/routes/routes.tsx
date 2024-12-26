@@ -1,6 +1,7 @@
 import Start from '@/pages/start';
 import Play from '@/pages/play';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { SocketProvider } from '@/context/SocketContext';
 
 
 const router = createBrowserRouter([
@@ -18,6 +19,10 @@ const router = createBrowserRouter([
   },
 ]);
 
-const Routes = () => <RouterProvider router={router} />;
+const Routes = () => (
+  <SocketProvider>
+    <RouterProvider router={router} />
+  </SocketProvider>
+);
 
 export default Routes;
