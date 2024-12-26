@@ -8,48 +8,13 @@ import { _USER } from '@/types';
 export const useRoomCreation = (userData: _USER | null) => {
   const [creatingRoom, setCreatingRoom] = useState(false);
   const [roomCode, setRoomCode] = useState<string | null>(null);
-  const { socket, connectSocket, disconnectSocket, isConnected } = useSocket();
+  const { connectSocket, disconnectSocket } = useSocket();
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const waitForSocketConnection = async (): Promise<void> => {
-    console.log('🔄 Starting waitForSocketConnection');
-    console.log('Current connection status:', isConnected);
-    
-    return new Promise((resolve, reject) => {
-      const maxAttempts = 5;
-      let attempts = 0;
-      console.log('Setting up connection check interval');
-      
-      const interval = setInterval(() => {
-        console.log(`Connection attempt ${attempts + 1}/${maxAttempts}`);
-        console.log('isConnected status:', isConnected);
-        
-        if (isConnected) {
-          console.log('✅ Socket connected successfully');
-          clearInterval(interval);
-          resolve();
-        } else if (attempts >= maxAttempts) {
-          console.log('❌ Max connection attempts reached');
-          clearInterval(interval);
-          reject(new Error('Failed to connect to WebSocket server.'));
-        }
-        attempts++;
-      }, 1000);
-    });
-  };
-
   const handleCreateNewGame = async () => {
     console.log('🎮 Starting handleCreateNewGame');
-    console.log('Current userData:', userData);
-    console.log('Current socket status:', { 
-      socketExists: !!socket, 
-      isConnected, 
-      creatingRoom 
-    });
-
     if (!userData) {
-      console.log('❌ No user data found');
       toast({
         title: 'Error',
         description: 'User data is missing.',
@@ -59,84 +24,68 @@ export const useRoomCreation = (userData: _USER | null) => {
     }
 
     try {
-      console.log('🔄 Setting creatingRoom to true');
       setCreatingRoom(true);
 
-      console.log('📡 Calling createRoom API');
+      // 1. Create the room
       const { code } = await createRoom(userData.id);
       console.log('📝 Room created with code:', code);
       setRoomCode(code);
 
-      console.log('🔌 Initiating socket connection');
-      connectSocket();
+      // 2. Connect the socket (and wait for it to actually connect)
+      const connectedSocket = await connectSocket();
+      console.log(
+        '🔗 Socket is actually connected:',
+        connectedSocket.connected,
+        connectedSocket.id
+      );
 
-      console.log('⏳ Waiting for socket connection');
-      await waitForSocketConnection();
-
-      const setupRoomJoin = () => {
-        console.log('🎯 Setting up room join handlers');
-        if (!socket) {
-          console.log('❌ No socket available for room join');
-          return;
+      // 3. Set up listener for joinRoomResponse
+      const handleJoinRoomResponse = (response: { success: boolean; message?: string }) => {
+        console.log('📨 Received joinRoomResponse:', response);
+        
+        if (response.success) {
+          console.log('✅ Successfully joined room');
+          sessionStorage.setItem('roomCode', code);
+          sessionStorage.setItem('userId', userData.id.toString());
+          navigate(`/play/${code}`);
+        } else {
+          console.log('❌ Failed to join room:', response.message);
+          toast({
+            title: 'Error',
+            description: response.message || 'Failed to join room.',
+            variant: 'destructive',
+          });
         }
 
-        const handleJoinRoomResponse = (response: { success: boolean; message?: string }) => {
-          console.log('📨 Received joinRoomResponse:', response);
-          
-          if (response.success) {
-            console.log('✅ Successfully joined room');
-            sessionStorage.setItem('roomCode', code);
-            sessionStorage.setItem('userId', userData.id.toString());
-            navigate(`/play/${code}`);
-          } else {
-            console.log('❌ Failed to join room:', response.message);
-            toast({
-              title: 'Error',
-              description: response.message || 'Failed to join room.',
-              variant: 'destructive',
-            });
-          }
+        connectedSocket.off('joinRoomResponse', handleJoinRoomResponse);
+        setCreatingRoom(false);
+      };
 
-          console.log('🧹 Cleaning up joinRoomResponse listener');
-          socket.off('joinRoomResponse', handleJoinRoomResponse);
-          setCreatingRoom(false);
-        };
+      // Remove old listeners to prevent duplicates
+      connectedSocket.off('joinRoomResponse');
 
-        // Remove any existing listeners before adding new one
-        socket.off('joinRoomResponse');
-        console.log('👂 Adding joinRoomResponse listener');
-        socket.on('joinRoomResponse', handleJoinRoomResponse);
+      // Add the new listener
+      connectedSocket.on('joinRoomResponse', handleJoinRoomResponse);
 
-        console.log('📣 Emitting joinRoom event', { userId: userData.id, code });
-        socket.emit('joinRoom', { userId: userData.id, code });
+      // 4. Emit "joinRoom"
+      connectedSocket.emit('joinRoom', { userId: userData.id, code });
 
-        console.log('⏲️ Setting up timeout handler');
-        setTimeout(() => {
-          console.log('⌛ Checking timeout condition');
-          socket.off('joinRoomResponse', handleJoinRoomResponse);
-          if (!roomCode) {
-            console.log('❌ Join room timed out');
-            return;
-          }
+      // (Optional) Timeout handling
+      setTimeout(() => {
+        // If still "creatingRoom", maybe we never got a response
+        if (creatingRoom) {
+          console.log('❌ Timed out joining the room');
+          connectedSocket.off('joinRoomResponse', handleJoinRoomResponse);
           toast({
             title: 'Error',
             description: 'Timed out joining the room. Please try again.',
             variant: 'destructive',
           });
           setCreatingRoom(false);
-        }, 5000);
-      };
-
-      setupRoomJoin();
-
+        }
+      }, 5000);
     } catch (error: any) {
       console.error('❌ Error in handleCreateNewGame:', error);
-      console.log('Error details:', {
-        message: error.message,
-        stack: error.stack,
-        socketStatus: socket?.connected
-      });
-      
       toast({
         title: 'Error',
         description: error?.message || 'Failed to create room. Please try again.',
