@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { UserNameForm } from '@/components/UserNameForm';
 import { GameOptions } from '@/components/GameOptions';
 import { useUserCreation } from '@/hooks/useUserCreation';

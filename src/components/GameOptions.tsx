@@ -1,8 +1,7 @@
-import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Users, Plus } from 'lucide-react';
 import { _USER } from '@/types';
 
 interface GameOptionsProps {
@@ -20,29 +19,76 @@ export const GameOptions: React.FC<GameOptionsProps> = ({
   onCreateGame,
   creatingRoom,
 }) => (
-  <Card className="w-full max-w-md flex flex-col">
-    <CardContent className="flex flex-col gap-4 p-4">
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" className="p-2" onClick={onBack}>
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <label className="text-gray-700 font-medium">Let's Play, {userData?.name}</label>
-      </div>
+  <div className="bg-gray-50 w-full flex items-center justify-center">
+  <div className="flex min-h-screen items-center justify-center p-4 w-[33%]">
+    <Card className="w-full max-w-md shadow-lg">
+      <CardContent className="p-6">
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="h-10 w-10 rounded-full"
+              onClick={onBack}
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h2 className="text-xl font-semibold">
+              Welcome, {userData?.name}!
+            </h2>
+          </div>
 
-      <div className="flex flex-col gap-4">
-        <Input
-          type="text"
-          placeholder="Input the code"
-          className="w-full"
-        />
-        <Button onClick={onJoinGame} className="w-full">
-          Join Game
-        </Button>
-      </div>
-      <div className="text-center text-gray-500">OR</div>
-      <Button onClick={onCreateGame} className="w-full" disabled={creatingRoom}>
-        {creatingRoom ? 'Creating...' : 'Create New Game'}
-      </Button>
-    </CardContent>
-  </Card>
+          <div className="space-y-6 pt-4">
+            <div className="space-y-4">
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Enter room code"
+                  className="h-12 text-lg pl-12"
+                />
+                <Users className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              </div>
+              <Button 
+                onClick={onJoinGame} 
+                variant="outline"
+                className="w-full h-12 text-lg font-semibold"
+              >
+                Join Existing Game
+              </Button>
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center">
+                <span className="bg-background px-4 text-sm text-muted-foreground">
+                  or create a new game
+                </span>
+              </div>
+            </div>
+
+            <Button 
+              onClick={onCreateGame} 
+              className="w-full h-12 text-lg font-semibold relative"
+              disabled={creatingRoom}
+            >
+              {creatingRoom ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 border-t-2 border-r-2 border-white rounded-full animate-spin" />
+                  Creating Room...
+                </div>
+              ) : (
+                <>
+                  <Plus className="w-5 h-5 mr-2" />
+                  Create New Game
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  </div>
+  </div>
 );

@@ -7,6 +7,7 @@ interface SocketContextType {
   isConnected: boolean;
   connectSocket: () => void;
   disconnectSocket: () => void;
+  reconnectToRoom: (userId: number, roomCode: string) => void;
   error: string | null;
 }
 
@@ -15,6 +16,7 @@ const SocketContext = createContext<SocketContextType>({
   isConnected: false,
   connectSocket: () => {},
   disconnectSocket: () => {},
+  reconnectToRoom: () => {},
   error: null,
 });
 
@@ -29,7 +31,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize socket connection
   const connectSocket = useCallback(() => {
     try {
       if (!socket) {
@@ -39,6 +40,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
           reconnection: true,
           reconnectionAttempts: 5,
           reconnectionDelay: 1000,
+          timeout: 10000,
         });
 
         // Socket event listeners
@@ -59,9 +61,20 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
           setIsConnected(false);
         });
 
-        newSocket.on('error', (err) => {
-          console.error('Socket error:', err);
-          setError(err.message || 'An error occurred');
+        newSocket.on('reconnect', (attemptNumber) => {
+          console.log('Socket reconnected after', attemptNumber, 'attempts');
+          setIsConnected(true);
+          setError(null);
+        });
+
+        newSocket.on('reconnect_error', (err) => {
+          console.error('Reconnection error:', err);
+          setError('Failed to reconnect to server');
+        });
+
+        newSocket.on('reconnect_failed', () => {
+          console.error('Failed to reconnect after all attempts');
+          setError('Failed to reconnect after multiple attempts');
         });
 
         // Connect the socket
@@ -76,7 +89,26 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     }
   }, [socket]);
 
-  // Cleanup and disconnect socket
+  const reconnectToRoom = useCallback((userId: number, roomCode: string) => {
+    if (!socket || !socket.connected) {
+      connectSocket();
+    }
+
+    if (socket && socket.connected) {
+      socket.emit('joinRoom', { userId, code: roomCode });
+    } else {
+      const reconnectInterval = setInterval(() => {
+        if (socket && socket.connected) {
+          socket.emit('joinRoom', { userId, code: roomCode });
+          clearInterval(reconnectInterval);
+        }
+      }, 1000);
+
+      // Clear interval after 10 seconds if unsuccessful
+      setTimeout(() => clearInterval(reconnectInterval), 10000);
+    }
+  }, [socket, connectSocket]);
+
   const disconnectSocket = useCallback(() => {
     if (socket) {
       socket.disconnect();
@@ -102,6 +134,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
         isConnected,
         connectSocket,
         disconnectSocket,
+        reconnectToRoom,
         error,
       }}
     >

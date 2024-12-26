@@ -10,7 +10,7 @@ const router = createBrowserRouter([
     element: <Start />,
   },
   {
-    path: '/play',
+    path: '/play/:roomCode',
     element: <Play />,
   },
   {
