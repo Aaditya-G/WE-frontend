@@ -11,6 +11,7 @@ const Play = () => {
     error,
     reconnectAttempts,
     MAX_RECONNECT_ATTEMPTS,
+    participantCount,
   } = useGameConnection({ roomCode });
 
   return (
@@ -24,6 +25,9 @@ const Play = () => {
             <div className="text-center">
               <p className="text-lg font-medium">Room Code: {roomCode}</p>
               <p className="text-sm text-gray-500">Share this code with other players to join</p>
+              <p className="text-sm font-medium mt-2">
+                Players in Room: <span className="text-blue-600">{participantCount}</span>
+              </p>
             </div>
             <ConnectionStatus
               isConnected={isConnected}
@@ -31,6 +35,7 @@ const Play = () => {
               error={error}
               reconnectAttempts={reconnectAttempts}
               maxReconnectAttempts={MAX_RECONNECT_ATTEMPTS}
+              participantCount={participantCount}
             />
           </div>
         </CardContent>
