@@ -1,13 +1,12 @@
 
 import './App.css'
+import Routes from './routes/routes'
 
 function App() {
 
   return (
     <>
-      <div className='text-zinc-700'>
-        Welcome to White Elephant
-        </div>
+     <Routes />
     </>
   )
 }
