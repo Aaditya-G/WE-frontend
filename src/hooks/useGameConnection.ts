@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 interface GameConnectionProps {
   roomCode: string | undefined;
-  isNewRoom?: boolean;  // New prop to indicate if this is a newly created room
+  isNewRoom?: boolean;  
 }
 
 export const useGameConnection = ({ roomCode, isNewRoom = false }: GameConnectionProps) => {

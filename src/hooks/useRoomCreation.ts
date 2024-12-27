@@ -22,7 +22,6 @@ export const useRoomCreation = (userData: _USER | null) => {
       socket.off('createRoomResponse');
     }
     handlerSetupRef.current = false;
-    setCreatingRoom(false);
   }, [socket]);
 
   const handleCreateNewGame = useCallback(async () => {
