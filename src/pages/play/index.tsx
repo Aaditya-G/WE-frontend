@@ -1,10 +1,13 @@
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ConnectionStatus } from '@/components/game/ConnectionStatus';
 import { useGameConnection } from '@/hooks/useGameConnection';
 
 const Play = () => {
   const { roomCode } = useParams();
+  const location = useLocation();
+  const isNewRoom = location.state?.isNewRoom ?? false;
+
   const {
     hasJoinedRoom,
     isReconnecting,
@@ -12,7 +15,7 @@ const Play = () => {
     reconnectAttempts,
     MAX_RECONNECT_ATTEMPTS,
     participantCount,
-  } = useGameConnection({ roomCode });
+  } = useGameConnection({ roomCode , isNewRoom});
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
