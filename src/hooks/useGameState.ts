@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSocket } from '@/context/SocketContext';
-import { useToast } from '@/hooks/use-toast';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSocket } from "@/context/SocketContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface UserEntity {
   id: number;
@@ -8,9 +8,10 @@ interface UserEntity {
 }
 
 interface Participant {
-  id: number;        // user ID
+  name: string;
+  id: number; // user ID
   isCheckedIn: boolean;
-  giftId: number | null;       // or undefined
+  giftId: number | null; // or undefined
   receivedGiftId: number | null; // or undefined
 }
 
@@ -18,8 +19,8 @@ interface GameState {
   status: string; // e.g. 'NOT_STARTED', 'CHECKING', etc.
   owner: UserEntity;
   users: Participant[];
-  gifts: any[];  // your gift structure here
-  currentTurn: number | null; 
+  gifts: any[]; // your gift structure here
+  currentTurn: number | null;
 }
 
 export const useGameState = (userId: string | null) => {
@@ -31,70 +32,96 @@ export const useGameState = (userId: string | null) => {
   useEffect(() => {
     if (!socket) return;
 
-    const handleGameStateUpdate = (response: { success: boolean; gameState: GameState; message?: string }) => {
+    const handleGameStateUpdate = (response: {
+      success: boolean;
+      gameState: GameState;
+      message?: string;
+    }) => {
       if (!response.success) {
         // Optionally handle error
-        console.error('Failed to retrieve game state:', response.message);
+        console.error("Failed to retrieve game state:", response.message);
         return;
       }
       setGameState(response.gameState);
     };
 
-    socket.on('gameStateUpdate', handleGameStateUpdate);
+    socket.on("gameStateUpdate", handleGameStateUpdate);
 
     // Cleanup
     return () => {
-      socket.off('gameStateUpdate', handleGameStateUpdate);
+      socket.off("gameStateUpdate", handleGameStateUpdate);
     };
   }, [socket]);
 
   // Helper to retrieve the game state on demand
   const getGameState = useCallback(() => {
     if (!socket || !userId) return;
-    socket.emit('getGameState', { userId: Number(userId) });
+    socket.emit("getGameState", { userId: Number(userId) });
   }, [socket, userId]);
 
   // ----- Socket emit actions -----
   const addGift = useCallback(
     (giftName: string) => {
       if (!socket || !userId) return;
-      socket.emit('addGift', { userId: Number(userId), giftName }, (response: any) => {
-        console.log("addGift response", response)
-        if (response?.success === false) {
-          toast({
-            title: 'Add Gift Error',
-            description: response?.message || 'Unable to add gift',
-            variant: 'destructive',
-          });
+      socket.emit(
+        "addGift",
+        { userId: Number(userId), giftName },
+        (response: any) => {
+          console.log("addGift response", response);
+          if (response?.success === false) {
+            toast({
+              title: "Add Gift Error",
+              description: response?.message || "Unable to add gift",
+              variant: "destructive",
+            });
+          }
         }
-      });
+      );
     },
     [socket, userId, toast]
   );
 
   const checkIn = useCallback(() => {
     if (!socket || !userId) return;
-    socket.emit('checkIn', { userId: Number(userId) }, (response: any) => {
+    socket.emit("checkIn", { userId: Number(userId) }, (response: any) => {
       if (response?.success === false) {
         toast({
-          title: 'Check-in Error',
-          description: response?.message || 'Unable to check in',
-          variant: 'destructive',
+          title: "Check-in Error",
+          description: response?.message || "Unable to check in",
+          variant: "destructive",
         });
       }
     });
   }, [socket, userId, toast]);
 
   const startChecking = useCallback(() => {
-    console.log("I was clicked")
+    console.log("I was clicked");
     if (!socket || !userId) return;
-    socket.emit('startChecking', { userId: Number(userId) }, (response: any) => {
-        console.log("startChecking response", response)
+    socket.emit(
+      "startChecking",
+      { userId: Number(userId) },
+      (response: any) => {
+        console.log("startChecking response", response);
+        if (response?.success === false) {
+          toast({
+            title: "Start Checking Error",
+            description: response?.message || "Unable to start checking",
+            variant: "destructive",
+          });
+        }
+      }
+    );
+  }, [socket, userId, toast]);
+
+  const startGame = useCallback(() => {
+    if (!socket || !userId) return;
+    socket.emit("startGame", { userId: Number(userId) }, (response: any) => {
+      console.log("startGame response", response);
       if (response?.success === false) {
         toast({
-          title: 'Start Checking Error',
-          description: response?.message || 'Unable to start checking',
-          variant: 'destructive',
+          title: "Start Game Error",
+          description: response?.message || "Unable to start game",
+          variant: "destructive",
         });
       }
     });
@@ -109,25 +136,29 @@ export const useGameState = (userId: string | null) => {
   const canAddGift = useMemo(() => {
     if (!gameState || !userId) return false;
     // Example condition: game not started + user hasn't added a gift yet
-    if (gameState.status === 'NOT_STARTED') return false;
-    const currentUser = gameState.users.find(u => u.id === Number(userId));
+    if (gameState.status === "NOT_STARTED") return false;
+    const currentUser = gameState.users.find((u) => u.id === Number(userId));
     // Suppose we consider "has no gift" as giftId = null
-    return !!currentUser && currentUser.giftId == null && gameState.status === 'CHECKIN';
+    return (
+      !!currentUser &&
+      currentUser.giftId == null &&
+      gameState.status === "CHECKIN"
+    );
   }, [gameState, userId]);
 
   const canShowGiftList = useMemo(() => {
     if (!gameState || !userId) return false;
-    if (gameState.status === 'NOT_STARTED') return false;
-    
-    return true
-  } , [gameState, userId]);
+    if (gameState.status === "NOT_STARTED") return false;
+
+    return true;
+  }, [gameState, userId]);
 
   const canCheckIn = useMemo(() => {
     if (!gameState || !userId) return false;
     // Example condition: user has added a gift, but not checked in
-    const currentUser = gameState.users.find(u => u.id === Number(userId));
+    const currentUser = gameState.users.find((u) => u.id === Number(userId));
     if (!currentUser) return false;
-    return currentUser.giftId != null && !currentUser.isCheckedIn ;
+    return currentUser.giftId != null && !currentUser.isCheckedIn;
   }, [gameState, userId]);
 
   const showMinimumParticipants = useMemo(() => {
@@ -135,17 +166,48 @@ export const useGameState = (userId: string | null) => {
     // Example condition: user is the owner + game status is NOT_STARTED
     const isOwner = gameState.owner?.id === Number(userId);
     return isOwner && gameState.users.length < 3;
-  } , [gameState, userId]);
+  }, [gameState, userId]);
 
   const canStartChecking = useMemo(() => {
-    if(showMinimumParticipants) return false;
+    if (showMinimumParticipants) return false;
     if (!gameState || !userId) return false;
     // Example condition: user is the owner + game status is NOT_STARTED
     const isOwner = gameState.owner?.id === Number(userId);
-    return isOwner && gameState.status === 'NOT_STARTED';
+    return isOwner && gameState.status === "NOT_STARTED";
   }, [gameState, userId]);
 
-  
+  const canShowStartButton = useMemo(() => {
+    //start button will be shown when all users have checked in and gift count = user count
+    if (!gameState || !userId) return false;
+    const isOwner = gameState.owner?.id === Number(userId);
+    if (!isOwner) return false;
+    if (gameState.status !== "CHECKIN") return false;
+    if (gameState.users.length < 3) return false;
+    let giftCount = 0;
+    let checkedInCount = 0;
+    gameState.users.forEach((user) => {
+      if (user.giftId) giftCount++;
+      if (user.isCheckedIn) checkedInCount++;
+    });
+    return (
+      giftCount === gameState.users.length &&
+      checkedInCount === gameState.users.length
+    );
+  }, [gameState, userId]);
+
+  const canShowWaitingToStart = useMemo(() => {
+    // this will be shown to non owners, when game is ready to be started, that is when everyone has checked in
+    if (!gameState || !userId) return false;
+    const isOwner = gameState.owner?.id === Number(userId);
+    if (isOwner) return false;
+    if (gameState.status !== "CHECKIN") return false;
+    if (gameState.users.length < 3) return false;
+    let checkedInCount = 0;
+    gameState.users.forEach((user) => {
+      if (user.isCheckedIn) checkedInCount++;
+    });
+    return checkedInCount === gameState.users.length;
+  }, [gameState, userId]);
 
   return {
     gameState,
@@ -153,11 +215,14 @@ export const useGameState = (userId: string | null) => {
     addGift,
     checkIn,
     startChecking,
+    startGame,
     userHasNextTurn,
     canAddGift,
     canCheckIn,
     canStartChecking,
     canShowGiftList,
-    showMinimumParticipants
+    showMinimumParticipants,
+    canShowStartButton,
+    canShowWaitingToStart,
   };
 };

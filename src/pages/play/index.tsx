@@ -1,11 +1,11 @@
-import { useLocation, useParams } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ConnectionStatus } from '@/components/game/ConnectionStatus';
-import { useGameConnection } from '@/hooks/useGameConnection';
-import { useGameState } from '@/hooks/useGameState';
-import { PlayerList } from '@/components/game/PlayerList';
-import { GiftList } from '@/components/game/GiftList';
-import { AddGiftForm } from '@/components/game/AddGiftForm';
+import { useLocation, useParams } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ConnectionStatus } from "@/components/game/ConnectionStatus";
+import { useGameConnection } from "@/hooks/useGameConnection";
+import { useGameState } from "@/hooks/useGameState";
+import { PlayerList } from "@/components/game/PlayerList";
+import { GiftList } from "@/components/game/GiftList";
+import { AddGiftForm } from "@/components/game/AddGiftForm";
 
 const Play = () => {
   const { roomCode } = useParams();
@@ -21,7 +21,7 @@ const Play = () => {
     MAX_RECONNECT_ATTEMPTS,
     userId,
     participantCount,
-  } = useGameConnection({ roomCode , isNewRoom});
+  } = useGameConnection({ roomCode, isNewRoom });
 
   const {
     gameState,
@@ -29,14 +29,16 @@ const Play = () => {
     addGift,
     checkIn,
     startChecking,
+    startGame,
     userHasNextTurn,
     canAddGift,
     canCheckIn,
     canStartChecking,
     canShowGiftList,
-    showMinimumParticipants
+    showMinimumParticipants,
+    canShowStartButton,
+    canShowWaitingToStart,
   } = useGameState(userId);
-
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -48,9 +50,12 @@ const Play = () => {
           <div className="space-y-4">
             <div className="text-center">
               <p className="text-lg font-medium">Room Code: {roomCode}</p>
-              <p className="text-sm text-gray-500">Share this code with other players to join</p>
+              <p className="text-sm text-gray-500">
+                Share this code with other players to join
+              </p>
               <p className="text-sm font-medium mt-2">
-                Players in Room: <span className="text-blue-600">{participantCount}</span>
+                Players in Room:{" "}
+                <span className="text-blue-600">{participantCount}</span>
               </p>
             </div>
             <ConnectionStatus
@@ -65,59 +70,74 @@ const Play = () => {
 
           {/* If the user is not yet "joined", we don't render game UI */}
           {hasJoinedRoom.current && (
-              <div className="mt-6 space-y-4">
-
-                {/* Status & Next Turn */}
-                <p className="text-center font-semibold">
-                  Game Status: {gameState?.status || 'Loading...'}
+            <div className="mt-6 space-y-4">
+              {/* Status & Next Turn */}
+              <p className="text-center font-semibold">
+                Game Status: {gameState?.status || "Loading..."}
+              </p>
+              {userHasNextTurn && (
+                <p className="text-center text-green-600">
+                  You have the next turn!
                 </p>
-                {userHasNextTurn && (
-                  <p className="text-center text-green-600">
-                    You have the next turn!
+              )}
+
+              {/* Player List */}
+              <PlayerList
+                users={gameState?.users || []}
+                ownerId={gameState?.owner?.id}
+              />
+
+              {/* Minimum Participants  -> only shows to owner*/}
+              {showMinimumParticipants && (
+                <div>
+                  <p className="text-center text-red-500">
+                    You need at least 3 participants to start the game
                   </p>
-                )}
+                </div>
+              )}
 
-                {/* Player List */}
-                <PlayerList users={gameState?.users || []} ownerId={gameState?.owner?.id} />
+              {/* Gift List */}
+              {canShowGiftList && <GiftList gifts={gameState?.gifts || []} />}
 
-                {/* Minimum Participants  -> only shows to owner*/}
-                {showMinimumParticipants && (
-                  <div>
-                    <p className="text-center text-red-500">
-                      You need at least 3 participants to start the game
-                    </p>
-                  </div>
-                  
-                  )}
+              {/* Add Gift Form (shown only if the user can add a gift) */}
+              {canAddGift && <AddGiftForm onAddGift={addGift} />}
 
-                {/* Gift List */}
-                {canShowGiftList && <GiftList gifts={gameState?.gifts || []} /> }
+              {/* Check In Button */}
+              {canCheckIn && (
+                <button
+                  onClick={checkIn}
+                  className="px-4 py-2 bg-yellow-500 text-white rounded-md"
+                >
+                  Check In
+                </button>
+              )}
 
-                {/* Add Gift Form (shown only if the user can add a gift) */}
-                {canAddGift && <AddGiftForm onAddGift={addGift} />}
+              {/* Start Checking Button (only if the user is owner and can start) */}
+              {canStartChecking && (
+                <button
+                  onClick={startChecking}
+                  className="px-4 py-2 bg-red-500 text-white rounded-md"
+                >
+                  Start Check-In
+                </button>
+              )}
 
-                {/* Check In Button */}
-                {canCheckIn && (
-                  <button
-                    onClick={checkIn}
-                    className="px-4 py-2 bg-yellow-500 text-white rounded-md"
-                  >
-                    Check In
-                  </button>
-                )}
+              {canShowWaitingToStart && (
+                <p className="text-center text-blue-600">
+                  Waiting for the owner to start the game...
+                </p>
+              )}
 
-                {/* Start Checking Button (only if the user is owner and can start) */}
-                {canStartChecking && (
-                  <button
-                    onClick={startChecking}
-                    className="px-4 py-2 bg-red-500 text-white rounded-md"
-                  >
-                    Start Check-In
-                  </button>
-                )}
-
-              </div>
-            )}
+              {canShowStartButton && (
+                <button
+                  onClick={startGame}
+                  className="px-4 py-2 bg-green-500 text-white rounded-md"
+                >
+                  Start Game
+                </button>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

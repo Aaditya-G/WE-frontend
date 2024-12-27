@@ -1,4 +1,5 @@
 interface Participant {
+  name : string;
   id: number;
   isCheckedIn: boolean;
   giftId: number | null;
@@ -23,7 +24,7 @@ export function PlayerList({ users, ownerId }: PlayerListProps) {
           >
             <div>
               {isOwner && <span className="text-red-500 mr-1">[Owner]</span>}
-              <span>User #{user.id}</span>
+              <span>User #{user.name}</span>
             </div>
             <div>
               {user.giftId ? (
