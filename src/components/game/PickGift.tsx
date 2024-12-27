@@ -8,16 +8,18 @@ interface Gift {
   id: number;
   name: string;
   receivedById: number | null;
+  addedById: number;
 }
 
 interface PickGiftListProps {
   gifts: Gift[];
   onPickGift: (giftId: number) => void;
+  userId: number;
 }
 
-export const PickGiftList: React.FC<PickGiftListProps> = ({ gifts, onPickGift }) => {
-  // Filter out gifts that have already been picked (i.e., have a receivedById)
-  const availableGifts = gifts.filter((gift) => !gift.receivedById);
+export const PickGiftList: React.FC<PickGiftListProps> = ({ gifts, onPickGift , userId}) => {
+  const availableGifts = gifts.filter((gift) => gift.receivedById === null && gift.addedById !== userId);
+
 
   return (
     <Card className="mt-4">

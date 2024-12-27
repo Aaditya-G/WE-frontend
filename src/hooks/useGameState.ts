@@ -21,6 +21,10 @@ interface GameState {
   users: Participant[];
   gifts: any[]; // your gift structure here
   currentTurn: number | null;
+  totalStealsSoFar: number;
+  maxStealPerUser: number;
+  maxStealPerGame: number;
+  turnOrder: number[];
 }
 
 export const useGameState = (userId: string | null) => {

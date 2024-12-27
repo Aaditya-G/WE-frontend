@@ -50,18 +50,14 @@ const Play = () => {
     canShowWaitingToStart,
   } = useGameState(userId);
 
-
   const handlePickGift = (giftId: number) => {
-    // Call the socket emit
     pickGift(giftId);
 
-    // Once picked, hide the list
     setShowPickGiftList(false);
   };
 
-  // For demonstration, a placeholder if you want a UI flow:
   const handleStealGift = (giftId: number) => {
-    // stealGift(giftId);
+    stealGift(giftId);
     setShowStealGiftList(false);
   };
 
@@ -100,6 +96,16 @@ const Play = () => {
               <p className="text-center font-semibold">
                 Game Status: {gameState?.status || "Loading..."}
               </p>
+              {gameState?.turnOrder && gameState?.turnOrder?.length > 0 &&
+  gameState?.currentTurn !== null && (
+    <p className="text-center">
+      Next Turn:{" "}
+      {gameState.users.find(
+        (user) => user.id === gameState.currentTurn
+      )?.name || "Unknown Player"}
+    </p>
+  )}
+
               {userHasNextTurn && (
                 <div className="flex items-center justify-center gap-4 mt-4">
                   {/* Show "Pick" only if canPickGift */}
@@ -129,6 +135,7 @@ const Play = () => {
                 <PickGiftList
                   gifts={gameState?.gifts || []}
                   onPickGift={handlePickGift}
+                  userId={parseInt(userId as string)}
                 />
               )}
 
