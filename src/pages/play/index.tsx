@@ -6,7 +6,7 @@ import { useGameConnection } from '@/hooks/useGameConnection';
 const Play = () => {
   const { roomCode } = useParams();
   const {
-    isConnected,
+    hasJoinedRoom,
     isReconnecting,
     error,
     reconnectAttempts,
@@ -30,7 +30,7 @@ const Play = () => {
               </p>
             </div>
             <ConnectionStatus
-              isConnected={isConnected}
+              isConnected={hasJoinedRoom.current}
               isReconnecting={isReconnecting}
               error={error}
               reconnectAttempts={reconnectAttempts}

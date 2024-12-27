@@ -125,7 +125,6 @@ export const useGameConnection = ({ roomCode }: GameConnectionProps) => {
 
     setUserId(storedUserId);
 
-    // Set up joinRoomResponse listener before attempting to join
     if (socket) {
       console.log('Setting up socket listeners');
       socket.off('joinRoomResponse', handleJoinRoomResponse); // Remove any existing listeners
@@ -170,18 +169,16 @@ export const useGameConnection = ({ roomCode }: GameConnectionProps) => {
     }
   }, [roomCode, isConnected, navigate, handleReconnection, socket, reconnectAttempts, toast, handleJoinRoomResponse]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       console.log('Component unmounting - cleaning up');
       clearReconnectTimeout();
-      hasJoinedRoom.current = false;
       setIsReconnecting(false);
     };
   }, []);
 
   return {
-    isConnected,
+    hasJoinedRoom,
     isReconnecting,
     error,
     reconnectAttempts,

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useSocket } from '@/context/SocketContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -8,12 +8,24 @@ import { _USER } from '@/types';
 export const useRoomCreation = (userData: _USER | null) => {
   const [creatingRoom, setCreatingRoom] = useState(false);
   const [roomCode, setRoomCode] = useState<string | null>(null);
-  const { connectSocket, disconnectSocket } = useSocket();
+  const { socket, connectSocket, disconnectSocket } = useSocket();
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  // Use ref to track if response handler is set up
+  const handlerSetupRef = useRef(false);
 
-  const handleCreateNewGame = async () => {
-    console.log('🎮 Starting handleCreateNewGame');
+  // Cleanup function
+  const cleanup = useCallback(() => {
+    if (socket) {
+      socket.off('joinRoomResponse');
+      socket.off('createRoomResponse');
+    }
+    handlerSetupRef.current = false;
+    setCreatingRoom(false);
+  }, [socket]);
+
+  const handleCreateNewGame = useCallback(async () => {
     if (!userData) {
       toast({
         title: 'Error',
@@ -23,78 +35,80 @@ export const useRoomCreation = (userData: _USER | null) => {
       return;
     }
 
+    // Prevent multiple attempts
+    if (creatingRoom) {
+      console.log('Room creation already in progress');
+      return;
+    }
+
     try {
       setCreatingRoom(true);
 
-      // 1. Create the room
+      // 1. Ensure we have a connected socket
+      let currentSocket = socket;
+      if (!currentSocket?.connected) {
+        currentSocket = await connectSocket();
+      }
+
+      if (!currentSocket) {
+        throw new Error('Failed to establish socket connection');
+      }
+
+      // 2. Create room in backend
       const { code } = await createRoom(userData.id);
-      console.log('📝 Room created with code:', code);
+      console.log('Room created with code:', code);
       setRoomCode(code);
 
-      // 2. Connect the socket (and wait for it to actually connect)
-      const connectedSocket = await connectSocket();
-      console.log(
-        '🔗 Socket is actually connected:',
-        connectedSocket.connected,
-        connectedSocket.id
-      );
+      // 3. Set up response handlers (only if not already set up)
+      if (!handlerSetupRef.current) {
+        handlerSetupRef.current = true;
 
-      // 3. Set up listener for joinRoomResponse
-      const handleJoinRoomResponse = (response: { success: boolean; message?: string }) => {
-        console.log('📨 Received joinRoomResponse:', response);
+        const handleResponse = (response: { success: boolean; message?: string }) => {
+          console.log('Received response:', response);
+          
+          if (response.success) {
+            sessionStorage.setItem('roomCode', code);
+            sessionStorage.setItem('userId', userData.id.toString());
+            navigate(`/play/${code}`);
+          } else {
+            toast({
+              title: 'Error',
+              description: response.message || 'Failed to join room.',
+              variant: 'destructive',
+            });
+          }
+          cleanup();
+        };
+
+        // Clean up existing listeners first
+        currentSocket.off('joinRoomResponse');
+        currentSocket.off('createRoomResponse');
         
-        if (response.success) {
-          console.log('✅ Successfully joined room');
-          sessionStorage.setItem('roomCode', code);
-          sessionStorage.setItem('userId', userData.id.toString());
-          navigate(`/play/${code}`);
-        } else {
-          console.log('❌ Failed to join room:', response.message);
-          toast({
-            title: 'Error',
-            description: response.message || 'Failed to join room.',
-            variant: 'destructive',
-          });
-        }
+        // Add new listeners that will auto-remove after first trigger
+        currentSocket.once('joinRoomResponse', handleResponse);
+        currentSocket.once('createRoomResponse', handleResponse);
+      }
 
-        connectedSocket.off('joinRoomResponse', handleJoinRoomResponse);
-        setCreatingRoom(false);
-      };
+      // 4. Emit join room event
+      console.log('Emitting joinRoom event');
+      currentSocket.emit('joinRoom', { userId: userData.id, code });
 
-      // Remove old listeners to prevent duplicates
-      connectedSocket.off('joinRoomResponse');
-
-      // Add the new listener
-      connectedSocket.on('joinRoomResponse', handleJoinRoomResponse);
-
-      // 4. Emit "joinRoom"
-      connectedSocket.emit('joinRoom', { userId: userData.id, code });
-
-      // (Optional) Timeout handling
-      setTimeout(() => {
-        // If still "creatingRoom", maybe we never got a response
-        if (creatingRoom) {
-          console.log('❌ Timed out joining the room');
-          connectedSocket.off('joinRoomResponse', handleJoinRoomResponse);
-          toast({
-            title: 'Error',
-            description: 'Timed out joining the room. Please try again.',
-            variant: 'destructive',
-          });
-          setCreatingRoom(false);
-        }
-      }, 5000);
     } catch (error: any) {
-      console.error('❌ Error in handleCreateNewGame:', error);
+      console.error('Error in handleCreateNewGame:', error);
       toast({
         title: 'Error',
-        description: error?.message || 'Failed to create room. Please try again.',
+        description: error?.message || 'Failed to create room.',
         variant: 'destructive',
       });
-      setCreatingRoom(false);
+      cleanup();
       disconnectSocket();
     }
-  };
+  }, [userData, creatingRoom, socket, connectSocket, disconnectSocket, toast, navigate, cleanup]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return cleanup;
+  }, [cleanup]);
 
   return {
     creatingRoom,
