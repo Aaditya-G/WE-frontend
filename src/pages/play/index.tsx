@@ -2,10 +2,15 @@ import { useLocation, useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ConnectionStatus } from '@/components/game/ConnectionStatus';
 import { useGameConnection } from '@/hooks/useGameConnection';
+import { useGameState } from '@/hooks/useGameState';
+import { PlayerList } from '@/components/game/PlayerList';
+import { GiftList } from '@/components/game/GiftList';
+import { AddGiftForm } from '@/components/game/AddGiftForm';
 
 const Play = () => {
   const { roomCode } = useParams();
   const location = useLocation();
+  /**temporarily disabled right now */
   const isNewRoom = location.state?.isNewRoom ?? false;
 
   const {
@@ -14,8 +19,22 @@ const Play = () => {
     error,
     reconnectAttempts,
     MAX_RECONNECT_ATTEMPTS,
+    userId,
     participantCount,
   } = useGameConnection({ roomCode , isNewRoom});
+
+  const {
+    gameState,
+    getGameState,
+    addGift,
+    checkIn,
+    startChecking,
+    userHasNextTurn,
+    canAddGift,
+    canCheckIn,
+    canStartChecking,
+  } = useGameState(userId);
+
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -41,6 +60,52 @@ const Play = () => {
               participantCount={participantCount}
             />
           </div>
+
+          {/* If the user is not yet "joined", we don't render game UI */}
+          {hasJoinedRoom.current && (
+              <div className="mt-6 space-y-4">
+
+                {/* Status & Next Turn */}
+                <p className="text-center font-semibold">
+                  Game Status: {gameState?.status || 'Loading...'}
+                </p>
+                {userHasNextTurn && (
+                  <p className="text-center text-green-600">
+                    You have the next turn!
+                  </p>
+                )}
+
+                {/* Player List */}
+                <PlayerList users={gameState?.users || []} ownerId={gameState?.owner?.id} />
+
+                {/* Gift List */}
+                <GiftList gifts={gameState?.gifts || []} />
+
+                {/* Add Gift Form (shown only if the user can add a gift) */}
+                {canAddGift && <AddGiftForm onAddGift={addGift} />}
+
+                {/* Check In Button */}
+                {canCheckIn && (
+                  <button
+                    onClick={checkIn}
+                    className="px-4 py-2 bg-yellow-500 text-white rounded-md"
+                  >
+                    Check In
+                  </button>
+                )}
+
+                {/* Start Checking Button (only if the user is owner and can start) */}
+                {canStartChecking && (
+                  <button
+                    onClick={startChecking}
+                    className="px-4 py-2 bg-red-500 text-white rounded-md"
+                  >
+                    Start Check-In
+                  </button>
+                )}
+
+              </div>
+            )}
         </CardContent>
       </Card>
     </div>

@@ -68,7 +68,7 @@ export const useRoomCreation = (userData: _USER | null) => {
           if (response.success) {
             sessionStorage.setItem('roomCode', code);
             sessionStorage.setItem('userId', userData.id.toString());
-            navigate(`/play/${code}`, { state: { isNewRoom: true } });
+            navigate(`/play/${code}`,);
           } else {
             toast({
               title: 'Error',
