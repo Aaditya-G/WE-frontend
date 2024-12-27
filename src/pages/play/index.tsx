@@ -33,6 +33,8 @@ const Play = () => {
     canAddGift,
     canCheckIn,
     canStartChecking,
+    canShowGiftList,
+    showMinimumParticipants
   } = useGameState(userId);
 
 
@@ -78,8 +80,18 @@ const Play = () => {
                 {/* Player List */}
                 <PlayerList users={gameState?.users || []} ownerId={gameState?.owner?.id} />
 
+                {/* Minimum Participants  -> only shows to owner*/}
+                {showMinimumParticipants && (
+                  <div>
+                    <p className="text-center text-red-500">
+                      You need at least 3 participants to start the game
+                    </p>
+                  </div>
+                  
+                  )}
+
                 {/* Gift List */}
-                <GiftList gifts={gameState?.gifts || []} />
+                {canShowGiftList && <GiftList gifts={gameState?.gifts || []} /> }
 
                 {/* Add Gift Form (shown only if the user can add a gift) */}
                 {canAddGift && <AddGiftForm onAddGift={addGift} />}

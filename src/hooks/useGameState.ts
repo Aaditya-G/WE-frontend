@@ -109,26 +109,43 @@ export const useGameState = (userId: string | null) => {
   const canAddGift = useMemo(() => {
     if (!gameState || !userId) return false;
     // Example condition: game not started + user hasn't added a gift yet
-    if (gameState.status !== 'NOT_STARTED') return false;
+    if (gameState.status === 'NOT_STARTED') return false;
     const currentUser = gameState.users.find(u => u.id === Number(userId));
     // Suppose we consider "has no gift" as giftId = null
-    return !!currentUser && currentUser.giftId == null;
+    return !!currentUser && currentUser.giftId == null && gameState.status === 'CHECKIN';
   }, [gameState, userId]);
+
+  const canShowGiftList = useMemo(() => {
+    if (!gameState || !userId) return false;
+    if (gameState.status === 'NOT_STARTED') return false;
+    
+    return true
+  } , [gameState, userId]);
 
   const canCheckIn = useMemo(() => {
     if (!gameState || !userId) return false;
     // Example condition: user has added a gift, but not checked in
     const currentUser = gameState.users.find(u => u.id === Number(userId));
     if (!currentUser) return false;
-    return currentUser.giftId != null && !currentUser.isCheckedIn;
+    return currentUser.giftId != null && !currentUser.isCheckedIn ;
   }, [gameState, userId]);
 
+  const showMinimumParticipants = useMemo(() => {
+    if (!gameState || !userId) return false;
+    // Example condition: user is the owner + game status is NOT_STARTED
+    const isOwner = gameState.owner?.id === Number(userId);
+    return isOwner && gameState.users.length < 3;
+  } , [gameState, userId]);
+
   const canStartChecking = useMemo(() => {
+    if(showMinimumParticipants) return false;
     if (!gameState || !userId) return false;
     // Example condition: user is the owner + game status is NOT_STARTED
     const isOwner = gameState.owner?.id === Number(userId);
     return isOwner && gameState.status === 'NOT_STARTED';
   }, [gameState, userId]);
+
+  
 
   return {
     gameState,
@@ -140,5 +157,7 @@ export const useGameState = (userId: string | null) => {
     canAddGift,
     canCheckIn,
     canStartChecking,
+    canShowGiftList,
+    showMinimumParticipants
   };
 };
