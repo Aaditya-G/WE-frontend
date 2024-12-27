@@ -25,6 +25,7 @@ interface GameState {
   maxStealPerUser: number;
   maxStealPerGame: number;
   turnOrder: number[];
+  logs: any[]; // your log structure here
 }
 
 export const useGameState = (userId: string | null) => {

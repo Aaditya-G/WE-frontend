@@ -9,6 +9,7 @@ import { AddGiftForm } from "@/components/game/AddGiftForm";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PickGiftList } from "@/components/game/PickGift";
+import Logger from "@/components/game/Logger";
 
 const Play = () => {
   const { roomCode } = useParams();
@@ -205,6 +206,9 @@ const Play = () => {
                   Start Game
                 </button>
               )}
+
+
+              <Logger logs={gameState?.logs || []} />
             </div>
           )}
         </CardContent>
