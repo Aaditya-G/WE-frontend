@@ -6,6 +6,9 @@ import { useGameState } from "@/hooks/useGameState";
 import { PlayerList } from "@/components/game/PlayerList";
 import { GiftList } from "@/components/game/GiftList";
 import { AddGiftForm } from "@/components/game/AddGiftForm";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { PickGiftList } from "@/components/game/PickGift";
 
 const Play = () => {
   const { roomCode } = useParams();
@@ -23,6 +26,9 @@ const Play = () => {
     participantCount,
   } = useGameConnection({ roomCode, isNewRoom });
 
+  const [showPickGiftList, setShowPickGiftList] = useState(false);
+  const [showStealGiftList, setShowStealGiftList] = useState(false);
+
   const {
     gameState,
     getGameState,
@@ -30,7 +36,11 @@ const Play = () => {
     checkIn,
     startChecking,
     startGame,
+    pickGift,
+    stealGift,
     userHasNextTurn,
+    canPickGift,
+    canStealGift,
     canAddGift,
     canCheckIn,
     canStartChecking,
@@ -39,6 +49,21 @@ const Play = () => {
     canShowStartButton,
     canShowWaitingToStart,
   } = useGameState(userId);
+
+
+  const handlePickGift = (giftId: number) => {
+    // Call the socket emit
+    pickGift(giftId);
+
+    // Once picked, hide the list
+    setShowPickGiftList(false);
+  };
+
+  // For demonstration, a placeholder if you want a UI flow:
+  const handleStealGift = (giftId: number) => {
+    // stealGift(giftId);
+    setShowStealGiftList(false);
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -76,9 +101,46 @@ const Play = () => {
                 Game Status: {gameState?.status || "Loading..."}
               </p>
               {userHasNextTurn && (
-                <p className="text-center text-green-600">
-                  You have the next turn!
-                </p>
+                <div className="flex items-center justify-center gap-4 mt-4">
+                  {/* Show "Pick" only if canPickGift */}
+                  {canPickGift && (
+                    <Button
+                      onClick={() => setShowPickGiftList((prev) => !prev)}
+                      className="bg-blue-500 hover:bg-blue-600 text-white"
+                    >
+                      {showPickGiftList ? "Cancel" : "Pick a Gift"}
+                    </Button>
+                  )}
+
+                  {/* Show "Steal" only if canStealGift */}
+                  {canStealGift && (
+                    <Button
+                      variant="destructive"
+                      onClick={() => setShowStealGiftList((prev) => !prev)}
+                    >
+                      {showStealGiftList ? "Cancel" : "Steal a Gift"}
+                    </Button>
+                  )}
+                </div>
+              )}
+
+              {/* RENDER PICK GIFT LIST */}
+              {showPickGiftList && (
+                <PickGiftList
+                  gifts={gameState?.gifts || []}
+                  onPickGift={handlePickGift}
+                />
+              )}
+
+              {/* RENDER STEAL GIFT LIST (placeholder, once you implement stealing) */}
+              {showStealGiftList && (
+                <div className="mt-4">
+                  {/* You might have a similar "StealGiftList" subcomponent if you want */}
+                  <p className="text-center text-gray-500">
+                    (Steal flow not yet implemented)
+                  </p>
+                  {/* <StealGiftList gifts={...} onStealGift={handleStealGift} /> */}
+                </div>
               )}
 
               {/* Player List */}

@@ -127,11 +127,57 @@ export const useGameState = (userId: string | null) => {
     });
   }, [socket, userId, toast]);
 
+  const pickGift = useCallback((giftId: number) => {
+    if (!socket || !userId) return;
+    socket.emit("pickGift", { userId: Number(userId), giftId }, (response: any) => {
+      if (response?.success === false) {
+        toast({
+          title: "Pick Gift Error",
+          description: response?.message || "Unable to pick gift",
+          variant: "destructive",
+        });
+      }
+    });
+  }, [socket, userId, toast]);
+
+  const stealGift = useCallback((giftId: number) => {
+    if (!socket || !userId) return;
+    socket.emit("stealGift", { userId: Number(userId), giftId }, (response: any) => {
+      if (response?.success === false) {
+        toast({
+          title: "Steal Gift Error",
+          description: response?.message || "Unable to steal gift",
+          variant: "destructive",
+        });
+      }
+    });
+  }, [socket, userId, toast]);
+
   // ----- Derived booleans for UI -----
   const userHasNextTurn = useMemo(() => {
     if (!gameState || !userId) return false;
     return gameState.currentTurn === Number(userId);
   }, [gameState, userId]);
+
+  const canPickGift = useMemo(() => {
+    if (!gameState || !userId) return false;
+    // must be ongoing, user must have the turn, maybe user shouldn't already own a gift, etc.
+    return (
+      gameState.status === "ONGOING" &&
+      userHasNextTurn
+      // plus any other condition, e.g. user doesn't already have a gift
+    );
+  }, [gameState, userId, userHasNextTurn]);
+
+  const canStealGift = useMemo(() => {
+    if (!gameState || !userId) return false;
+    // must be ongoing, user must have the turn, user doesn't own the gift to be stolen, etc.
+    return (
+      gameState.status === "ONGOING" &&
+      userHasNextTurn
+      // plus any other condition from your rules
+    );
+  }, [gameState, userId, userHasNextTurn]);
 
   const canAddGift = useMemo(() => {
     if (!gameState || !userId) return false;
@@ -216,7 +262,11 @@ export const useGameState = (userId: string | null) => {
     checkIn,
     startChecking,
     startGame,
+    pickGift,
+    stealGift,
     userHasNextTurn,
+    canPickGift,
+    canStealGift,
     canAddGift,
     canCheckIn,
     canStartChecking,
