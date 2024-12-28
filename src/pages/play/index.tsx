@@ -10,6 +10,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PickGiftList } from "@/components/game/PickGift";
 import Logger from "@/components/game/Logger";
+import { StealGiftList } from "@/components/game/StealGiftList";
 
 const Play = () => {
   const { roomCode } = useParams();
@@ -97,15 +98,16 @@ const Play = () => {
               <p className="text-center font-semibold">
                 Game Status: {gameState?.status || "Loading..."}
               </p>
-              {gameState?.turnOrder && gameState?.turnOrder?.length > 0 &&
-  gameState?.currentTurn !== null && (
-    <p className="text-center">
-      Next Turn:{" "}
-      {gameState.users.find(
-        (user) => user.id === gameState.currentTurn
-      )?.name || "Unknown Player"}
-    </p>
-  )}
+              {gameState?.turnOrder &&
+                gameState?.turnOrder?.length > 0 &&
+                gameState?.currentTurn !== null && (
+                  <p className="text-center">
+                    Next Turn:{" "}
+                    {gameState.users.find(
+                      (user) => user.id === gameState.currentTurn
+                    )?.name || "Unknown Player"}
+                  </p>
+                )}
 
               {userHasNextTurn && (
                 <div className="flex items-center justify-center gap-4 mt-4">
@@ -140,15 +142,21 @@ const Play = () => {
                 />
               )}
 
-              {/* RENDER STEAL GIFT LIST (placeholder, once you implement stealing) */}
-              {showStealGiftList && (
-                <div className="mt-4">
-                  {/* You might have a similar "StealGiftList" subcomponent if you want */}
-                  <p className="text-center text-gray-500">
-                    (Steal flow not yet implemented)
-                  </p>
-                  {/* <StealGiftList gifts={...} onStealGift={handleStealGift} /> */}
-                </div>
+              {showStealGiftList && gameState && (
+                <StealGiftList
+                  gifts={gameState.gifts}
+                  onStealGift={handleStealGift}
+                  userId={parseInt(userId as string)}
+                  maxStealPerGift={gameState.maxStealPerGift}
+                  maxStealPerUser={gameState.maxStealPerUser}
+                  currentUserSteals={
+                    gameState.users.find(
+                      (u) => u.id === parseInt(userId as string)
+                    )?.stealsSoFar || 0
+                  }
+                  totalGameSteals={gameState.totalStealsSoFar}
+                  maxGameSteals={gameState.maxStealPerGame}
+                />
               )}
 
               {/* Player List */}
@@ -206,7 +214,6 @@ const Play = () => {
                   Start Game
                 </button>
               )}
-
 
               <Logger logs={gameState?.logs || []} />
             </div>

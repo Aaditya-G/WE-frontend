@@ -63,30 +63,26 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
 
           // Event: connect
           newSocket.on('connect', () => {
-            console.log('Socket connected:', newSocket.id);
-            setIsConnected(true);
+setIsConnected(true);
             setError(null);
             resolve(newSocket);
           });
 
           // Event: connect_error
           newSocket.on('connect_error', (err) => {
-            console.log('Connection error:', err);
-            setError('Failed to connect to server');
+setError('Failed to connect to server');
             setIsConnected(false);
             reject(err);
           });
 
           // Event: disconnect
           newSocket.on('disconnect', () => {
-            console.log('Socket disconnected');
-            setIsConnected(false);
+setIsConnected(false);
           });
 
           // Event: reconnect
           newSocket.on('reconnect', (attemptNumber) => {
-            console.log('Socket reconnected after', attemptNumber, 'attempts');
-            setIsConnected(true);
+setIsConnected(true);
             setError(null);
           });
 
@@ -138,8 +134,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       try {
         const connectedSocket = await connectSocket();
         connectedSocket.emit('joinRoom', { userId, code: roomCode });
-        console.log(`Emitted 'joinRoom' for userId: ${userId}, roomCode: ${roomCode}`);
-      } catch (err) {
+} catch (err) {
         console.error('Failed to reconnect and join room:', err);
         throw err; // Propagate the error to allow the caller to handle it
       }
