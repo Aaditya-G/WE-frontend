@@ -1,20 +1,19 @@
-import Start from '@/pages/start';
-import Play from '@/pages/play';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { SocketProvider } from '@/context/SocketContext';
-
+import Start from "@/pages/start";
+import Play from "@/pages/play";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { SocketProvider } from "@/context/SocketContext";
 
 const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: <Start />,
   },
   {
-    path: '/play/:roomCode',
+    path: "/play/:roomCode",
     element: <Play />,
   },
   {
-    path: '*',
+    path: "*",
     element: <div>404 Not Found</div>,
   },
 ]);

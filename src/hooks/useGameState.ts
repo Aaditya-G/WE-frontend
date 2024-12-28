@@ -9,25 +9,25 @@ interface UserEntity {
 
 interface Participant {
   name: string;
-  id: number; 
+  id: number;
   isCheckedIn: boolean;
   giftId: number | null;
-  receivedGiftId: number | null; 
+  receivedGiftId: number | null;
   stealsSoFar: number;
 }
 
 interface GameState {
-  status: string; 
+  status: string;
   owner: UserEntity;
   users: Participant[];
-  gifts: any[]; 
+  gifts: any[];
   currentTurn: number | null;
   totalStealsSoFar: number;
   maxStealPerUser: number;
   maxStealPerGame: number;
   maxStealPerGift: number;
   turnOrder: number[];
-  logs: any[]; 
+  logs: any[];
 }
 
 export const useGameState = (userId: string | null) => {
@@ -77,10 +77,10 @@ export const useGameState = (userId: string | null) => {
               variant: "destructive",
             });
           }
-        }
+        },
       );
     },
-    [socket, userId, toast]
+    [socket, userId, toast],
   );
 
   const checkIn = useCallback(() => {
@@ -109,7 +109,7 @@ export const useGameState = (userId: string | null) => {
             variant: "destructive",
           });
         }
-      }
+      },
     );
   }, [socket, userId, toast]);
 
@@ -140,10 +140,10 @@ export const useGameState = (userId: string | null) => {
               variant: "destructive",
             });
           }
-        }
+        },
       );
     },
-    [socket, userId, toast]
+    [socket, userId, toast],
   );
 
   const stealGift = useCallback(
@@ -160,10 +160,10 @@ export const useGameState = (userId: string | null) => {
               variant: "destructive",
             });
           }
-        }
+        },
       );
     },
-    [socket, userId, toast]
+    [socket, userId, toast],
   );
 
   // ----- Derived booleans for UI -----
@@ -174,9 +174,7 @@ export const useGameState = (userId: string | null) => {
 
   const canPickGift = useMemo(() => {
     if (!gameState || !userId) return false;
-    return (
-      gameState.status === "ONGOING" && userHasNextTurn
-    );
+    return gameState.status === "ONGOING" && userHasNextTurn;
   }, [gameState, userId, userHasNextTurn]);
 
   const canStealGift = useMemo(() => {

@@ -62,7 +62,7 @@ export const useGameConnection = ({
         }
       }
     },
-    [roomCode, toast, userId]
+    [roomCode, toast, userId],
   );
 
   const handleReconnection = useCallback(async () => {
@@ -127,11 +127,11 @@ export const useGameConnection = ({
       } else {
         const backoffDelay = Math.min(
           1000 * Math.pow(2, reconnectAttempts),
-          10000
+          10000,
         );
         reconnectTimeoutRef.current = setTimeout(
           handleReconnection,
-          backoffDelay
+          backoffDelay,
         );
       }
     }

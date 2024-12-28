@@ -1,17 +1,17 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 interface AddGiftFormProps {
   onAddGift: (giftName: string) => void;
 }
 
 export function AddGiftForm({ onAddGift }: AddGiftFormProps) {
-  const [giftName, setGiftName] = useState('');
+  const [giftName, setGiftName] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!giftName.trim()) return;
     onAddGift(giftName.trim());
-    setGiftName('');
+    setGiftName("");
   };
 
   return (

@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { UserNameForm } from '@/components/UserNameForm';
-import { GameOptions } from '@/components/GameOptions';
-import { useUserCreation } from '@/hooks/useUserCreation';
-import { useRoomCreation } from '@/hooks/useRoomCreation';
-import { useRoomJoin } from '@/hooks/useRoomJoin'; // you'll create this
+import { useState } from "react";
+import { UserNameForm } from "@/components/UserNameForm";
+import { GameOptions } from "@/components/GameOptions";
+import { useUserCreation } from "@/hooks/useUserCreation";
+import { useRoomCreation } from "@/hooks/useRoomCreation";
+import { useRoomJoin } from "@/hooks/useRoomJoin"; // you'll create this
 
 const Start = () => {
   const [step, setStep] = useState(1);
@@ -16,10 +16,7 @@ const Start = () => {
     handleStartClick,
   } = useUserCreation();
 
-  const {
-    creatingRoom,
-    handleCreateNewGame,
-  } = useRoomCreation(userData);
+  const { creatingRoom, handleCreateNewGame } = useRoomCreation(userData);
 
   const { joining, handleJoinRoom } = useRoomJoin(userData);
 
@@ -33,7 +30,7 @@ const Start = () => {
   const handleJoinGame = (roomCode: string) => {
     if (!roomCode.trim()) {
       // Provide user feedback if code is empty
-      alert('Please enter a valid room code.');
+      alert("Please enter a valid room code.");
       return;
     }
     handleJoinRoom(roomCode);

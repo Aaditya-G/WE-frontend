@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft, Users, Plus } from 'lucide-react';
-import { _USER } from '@/types';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowLeft, Users, Plus } from "lucide-react";
+import { _USER } from "@/types";
 
 interface GameOptionsProps {
   userData: _USER | null;
@@ -20,7 +20,7 @@ export const GameOptions: React.FC<GameOptionsProps> = ({
   onCreateGame,
   creatingRoom,
 }) => {
-  const [roomCodeInput, setRoomCodeInput] = useState('');
+  const [roomCodeInput, setRoomCodeInput] = useState("");
 
   return (
     <div className="bg-gray-50 w-full flex items-center justify-center">

@@ -1,5 +1,5 @@
 interface Participant {
-  name : string;
+  name: string;
   id: number;
   isCheckedIn: boolean;
   giftId: number | null;

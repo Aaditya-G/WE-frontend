@@ -1,16 +1,19 @@
-import { BACKEND_URL } from '@/const';
-import axios from 'axios';
-import type { AxiosRequestConfig } from 'axios';
+import { BACKEND_URL } from "@/const";
+import axios from "axios";
+import type { AxiosRequestConfig } from "axios";
 
-export const basicAxios = async (endpoint: string, options?: AxiosRequestConfig) => {
+export const basicAxios = async (
+  endpoint: string,
+  options?: AxiosRequestConfig,
+) => {
   try {
     const res = await axios({
       baseURL: BACKEND_URL,
       url: endpoint,
-      method: 'GET',
+      method: "GET",
       withCredentials: false,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         // 'Authorization': `Bearer ${getAccessToken()}`,
       },
       ...options,

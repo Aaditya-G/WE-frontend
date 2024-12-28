@@ -104,7 +104,7 @@ const Play = () => {
                   <p className="text-center">
                     Next Turn:{" "}
                     {gameState.users.find(
-                      (user) => user.id === gameState.currentTurn
+                      (user) => user.id === gameState.currentTurn,
                     )?.name || "Unknown Player"}
                   </p>
                 )}
@@ -151,7 +151,7 @@ const Play = () => {
                   maxStealPerUser={gameState.maxStealPerUser}
                   currentUserSteals={
                     gameState.users.find(
-                      (u) => u.id === parseInt(userId as string)
+                      (u) => u.id === parseInt(userId as string),
                     )?.stealsSoFar || 0
                   }
                   totalGameSteals={gameState.totalStealsSoFar}

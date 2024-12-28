@@ -8,10 +8,8 @@ const API_ENDPOINTS = {
   /**Room Endpoint */
   createRoom: "/rooms/create",
   joinRoom: "/rooms/join",
-  
-  getRoomInfo: (code: string) => `/rooms/${code}`
 
-
+  getRoomInfo: (code: string) => `/rooms/${code}`,
 };
 
 export default API_ENDPOINTS;

@@ -17,9 +17,14 @@ interface PickGiftListProps {
   userId: number;
 }
 
-export const PickGiftList: React.FC<PickGiftListProps> = ({ gifts, onPickGift , userId}) => {
-  const availableGifts = gifts.filter((gift) => gift.receivedById === null && gift.addedById !== userId);
-
+export const PickGiftList: React.FC<PickGiftListProps> = ({
+  gifts,
+  onPickGift,
+  userId,
+}) => {
+  const availableGifts = gifts.filter(
+    (gift) => gift.receivedById === null && gift.addedById !== userId,
+  );
 
   return (
     <Card className="mt-4">
