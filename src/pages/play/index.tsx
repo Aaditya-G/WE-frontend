@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { PickGiftList } from "@/components/game/PickGift";
 import Logger from "@/components/game/Logger";
 import { StealGiftList } from "@/components/game/StealGiftList";
+import ReceivedGiftList from "@/components/game/GiftRecievedList";
 
 const Play = () => {
   const { roomCode } = useParams();
@@ -98,6 +99,11 @@ const Play = () => {
               <p className="text-center font-semibold">
                 Game Status: {gameState?.status || "Loading..."}
               </p>
+
+              {gameState?.status === "FINISHED" && (
+                <ReceivedGiftList users={gameState.users} />
+              )}
+
               {gameState?.turnOrder &&
                 gameState?.turnOrder?.length > 0 &&
                 gameState?.currentTurn !== null && (

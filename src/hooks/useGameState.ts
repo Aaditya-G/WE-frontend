@@ -12,7 +12,7 @@ interface Participant {
   id: number;
   isCheckedIn: boolean;
   giftId: number | null;
-  receivedGiftId: number | null;
+  receivedGift: any | null;
   stealsSoFar: number;
 }
 

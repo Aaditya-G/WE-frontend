@@ -8,7 +8,7 @@ import { _USER } from "@/types";
 interface GameOptionsProps {
   userData: _USER | null;
   onBack: () => void;
-  onJoinGame: (code: string) => void; // Accept the code
+  onJoinGame: (code: string) => void;
   onCreateGame: () => void;
   creatingRoom: boolean;
 }

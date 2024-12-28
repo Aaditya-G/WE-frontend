@@ -50,8 +50,6 @@ export const StealGiftList: React.FC<StealGiftListProps> = ({
 
   const stealableGifts = getStealableGifts();
 
-  console.log(stealableGifts);
-
   if (!canStealAny) {
     return (
       <Card className="mt-4">

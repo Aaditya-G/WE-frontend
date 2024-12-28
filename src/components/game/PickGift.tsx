@@ -1,9 +1,7 @@
-// PickGiftList.tsx
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-// Minimal interface for your Gift
 interface Gift {
   id: number;
   name: string;

@@ -66,15 +66,6 @@ export const useGameConnection = ({
   );
 
   const handleReconnection = useCallback(async () => {
-    console.log("handleReconnection called", {
-      userId,
-      roomCode,
-      isReconnecting,
-      hasJoinedRoom: hasJoinedRoom.current,
-      isInitialConnection: isInitialConnection.current,
-      isNewRoom,
-    });
-
     // Skip reconnection for new rooms or if already connected
     if (
       !userId ||
@@ -158,15 +149,6 @@ export const useGameConnection = ({
 
     const storedRoomCode = sessionStorage.getItem("roomCode");
     const storedUserId = sessionStorage.getItem("userId");
-
-    console.log("Main effect running", {
-      storedRoomCode,
-      storedUserId,
-      roomCode,
-      isConnected,
-      isNewRoom,
-      hasJoinedRoom: hasJoinedRoom.current,
-    });
 
     if (!storedRoomCode || !storedUserId || storedRoomCode !== roomCode) {
       if (!isNewRoom) {
