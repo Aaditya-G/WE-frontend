@@ -181,10 +181,6 @@ export const useGameConnection = ({
     if (socket) {
       socket.off("joinRoomResponse", handleJoinRoomResponse);
       socket.on("joinRoomResponse", handleJoinRoomResponse);
-      socket.on(
-        "gameStateUpdate",
-        (data: { success: boolean; gameState: string }) => {}
-      );
     }
 
     // For new rooms, we don't need to rejoin as the creation process handles it

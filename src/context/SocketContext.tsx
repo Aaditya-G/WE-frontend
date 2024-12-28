@@ -52,7 +52,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       try {
         if (!socket) {
           // Create a *new* socket
-          const newSocket = io(SOCKET_URL || 'http://localhost:3000', {
+          const newSocket = io(SOCKET_URL, {
             transports: ['websocket'],
             autoConnect: false,
             reconnection: true,
@@ -81,7 +81,7 @@ setIsConnected(false);
           });
 
           // Event: reconnect
-          newSocket.on('reconnect', (attemptNumber) => {
+          newSocket.on('reconnect', () => {
 setIsConnected(true);
             setError(null);
           });

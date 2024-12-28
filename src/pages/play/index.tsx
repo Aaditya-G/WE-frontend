@@ -33,7 +33,7 @@ const Play = () => {
 
   const {
     gameState,
-    getGameState,
+    // getGameState,
     addGift,
     checkIn,
     startChecking,
