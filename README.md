@@ -1,50 +1,117 @@
-# React + TypeScript + Vite
+# White Elephant Online Game - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This repository contains the frontend for the White Elephant Online Demo Game, built using Vite, Tailwind CSS, and React with TypeScript.
 
-Currently, two official plugins are available:
+## Table of Contents
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- [Prerequisites](#prerequisites)
+- [Setup Instructions](#setup-instructions)
+  - [Development Setup](#development-setup)
+  - [Production Setup](#production-setup)
+- [Environment Variables](#environment-variables)
+- [Project Scripts](#project-scripts)
+- [Tech Stack](#tech-stack)
 
-## Expanding the ESLint configuration
+## Prerequisites
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+Ensure you have the following installed:
 
-- Configure the top-level `parserOptions` property like this:
+- [Node.js](https://nodejs.org/) (version 16.x or higher recommended)
+- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-});
-```
+## Setup Instructions
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+### Development Setup
 
-```js
-// eslint.config.js
-import react from "eslint-plugin-react";
+To run the app in development mode:
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: "18.3" } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs["jsx-runtime"].rules,
-  },
-});
-```
+1. Clone the repository:
+   ```bash
+   git clone <frontend-repo-url>
+   cd <frontend-repo-folder>
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. Configure environment variables:
+   - Copy the `.env.sample` file to `.env`:
+     ```bash
+     cp .env.sample .env
+     ```
+   - Edit the `.env` file with the required values (refer to `.env.sample` for details).
+
+4. Start the development server:
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
+
+5. Open the app in your browser at [http://localhost:3000](http://localhost:3000).
+
+### Production Setup
+
+To build and serve the app for production:
+
+1. Clone the repository and navigate to the folder:
+   ```bash
+   git clone <frontend-repo-url>
+   cd <frontend-repo-folder>
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. Configure environment variables:
+   - Copy the `.env.sample` file to `.env`:
+     ```bash
+     cp .env.sample .env
+     ```
+   - Edit the `.env` file with the required values.
+
+4. Build the project:
+   ```bash
+   npm run build
+   # or
+   yarn build
+   ```
+
+5. Serve the built files using a static file server, such as `vite preview` or any web server:
+   ```bash
+   npm run preview
+   # or
+   yarn preview
+   ```
+
+   The app will be available at [http://localhost:4173](http://localhost:4173).
+
+## Environment Variables
+
+The app uses environment variables defined in the `.env` file. Refer to the `.env.sample` file for the required variables and their descriptions.
+
+## Project Scripts
+
+Here are the commonly used scripts:
+
+- `npm run dev`: Starts the development server.
+- `npm run build`: Builds the app for production.
+- `npm run preview`: Serves the production build locally for testing.
+- `npm run lint`: Lints the codebase.
+- `npm run format`: Formats the codebase using Prettier.
+
+## Tech Stack
+
+- **Framework**: [Vite](https://vitejs.dev/)
+- **CSS**: [Tailwind CSS](https://tailwindcss.com/)
+- **JavaScript Library**: [React](https://reactjs.org/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+
