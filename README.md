@@ -105,8 +105,6 @@ Here are the commonly used scripts:
 - `npm run dev`: Starts the development server.
 - `npm run build`: Builds the app for production.
 - `npm run preview`: Serves the production build locally for testing.
-- `npm run lint`: Lints the codebase.
-- `npm run format`: Formats the codebase using Prettier.
 
 ## Tech Stack
 
